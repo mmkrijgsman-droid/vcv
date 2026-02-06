@@ -79,9 +79,9 @@ export default function VolleyballTracker() {
       // Auto-adjust sidebars on mobile
       if (window.innerWidth < 640) {
         setSidebarWidth(window.innerWidth * 0.85);
-      }
-      if (window.innerWidth < 1024) {
-        setCompactSidebarWidth(Math.min(120, window.innerWidth * 0.18));
+        setCompactSidebarWidth(window.innerWidth * 0.10); // 10% op mobiel
+      } else if (window.innerWidth < 1024) {
+        setCompactSidebarWidth(Math.min(150, window.innerWidth * 0.15));
       }
     };
     
@@ -140,23 +140,28 @@ export default function VolleyballTracker() {
     if (!isResizingCompact) return;
     
     const handleMove = (e) => {
+      e.preventDefault(); // Voorkom scrolling tijdens resize
       const clientX = e.clientX || (e.touches && e.touches[0].clientX);
       if (!clientX) return;
       
       const newWidth = window.innerWidth - clientX;
-      if (newWidth >= 64 && newWidth <= 400) {
+      const minWidth = windowWidth < 640 ? windowWidth * 0.08 : 64; // Min 8% op mobiel
+      const maxWidth = windowWidth < 640 ? windowWidth * 0.30 : 400; // Max 30% op mobiel
+      
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
         setCompactSidebarWidth(newWidth);
-        localStorage.setItem('compactSidebarWidth', newWidth.toString());
       }
     };
     
     const handleEnd = () => {
       setIsResizingCompact(false);
+      // Save to localStorage only after resize completes
+      localStorage.setItem('compactSidebarWidth', compactSidebarWidth.toString());
     };
     
-    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mousemove', handleMove, { passive: false });
     document.addEventListener('mouseup', handleEnd);
-    document.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchmove', handleMove, { passive: false });
     document.addEventListener('touchend', handleEnd);
     
     return () => {
@@ -165,7 +170,7 @@ export default function VolleyballTracker() {
       document.removeEventListener('touchmove', handleMove);
       document.removeEventListener('touchend', handleEnd);
     };
-  }, [isResizingCompact]);
+  }, [isResizingCompact, windowWidth, compactSidebarWidth]);
 
   useEffect(() => {
     if (setWinner === 'home' || matchWinner === 'home') {
@@ -1792,10 +1797,10 @@ export default function VolleyballTracker() {
                       scorePoint('home', x, y);
                     }}
                   />
-                  <button onClick={(e) => { e.stopPropagation(); serviceFault('away'); }} className={`absolute top-1 right-1 px-2 py-1 rounded text-xs font-bold z-30 pointer-events-auto ${servingTeam === 'away' ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-500 cursor-not-allowed opacity-50'}`}>
+                  <button onClick={(e) => { e.stopPropagation(); serviceFault('away'); }} className={`absolute top-1 right-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold z-30 pointer-events-auto ${servingTeam === 'away' ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-500 cursor-not-allowed opacity-50'}`}>
                     Service Fout
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); takeTimeout('away'); }} className="absolute top-1 left-1 bg-yellow-600 px-2 py-1 rounded text-xs font-bold z-30 pointer-events-auto hover:bg-yellow-700">Timeout</button>
+                  <button onClick={(e) => { e.stopPropagation(); takeTimeout('away'); }} className="absolute top-1 left-1 bg-yellow-600 px-1 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold z-30 pointer-events-auto hover:bg-yellow-700">Timeout</button>
                 </div>
 
                 <div className="absolute top-1/2 left-0 right-0 h-2 bg-gray-900 transform -translate-y-1/2 z-10 border-t-2 border-b-2 border-yellow-400" />
@@ -1855,10 +1860,10 @@ export default function VolleyballTracker() {
                       scorePoint('away', x, y);
                     }}
                   />
-                  <button onClick={(e) => { e.stopPropagation(); serviceFault('home'); }} className={`absolute bottom-1 right-1 px-2 py-1 rounded text-xs font-bold z-30 pointer-events-auto ${servingTeam === 'home' ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-500 cursor-not-allowed opacity-50'}`}>
+                  <button onClick={(e) => { e.stopPropagation(); serviceFault('home'); }} className={`absolute bottom-1 right-1 px-1 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold z-30 pointer-events-auto ${servingTeam === 'home' ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-500 cursor-not-allowed opacity-50'}`}>
                     Service Fout
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); takeTimeout('home'); }} className="absolute bottom-1 left-1 bg-yellow-600 px-2 py-1 rounded text-xs font-bold z-30 pointer-events-auto hover:bg-yellow-700">Timeout</button>
+                  <button onClick={(e) => { e.stopPropagation(); takeTimeout('home'); }} className="absolute bottom-1 left-1 bg-yellow-600 px-1 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold z-30 pointer-events-auto hover:bg-yellow-700">Timeout</button>
                 </div>
               </div>
             </div>
@@ -1866,10 +1871,12 @@ export default function VolleyballTracker() {
         </div>
 
         <div 
-          className="bg-gray-800 rounded p-3 overflow-y-auto flex-shrink-0 transition-all duration-300 relative z-30 hidden sm:block"
+          className={`bg-gray-800 rounded p-3 overflow-y-auto flex-shrink-0 relative z-30 ${isResizingCompact ? '' : 'transition-all duration-300'}`}
           style={{ 
-            width: windowWidth < 1024 
-              ? (sidebarExpanded ? `${Math.min(320, windowWidth * 0.4)}px` : `${Math.min(120, windowWidth * 0.18)}px`)
+            width: windowWidth < 640
+              ? (sidebarExpanded ? `${Math.min(250, windowWidth * 0.35)}px` : `${compactSidebarWidth}px`)
+              : windowWidth < 1024 
+              ? (sidebarExpanded ? `${Math.min(320, windowWidth * 0.4)}px` : `${compactSidebarWidth}px`)
               : (sidebarExpanded ? '320px' : `${compactSidebarWidth}px`)
           }}
         >
@@ -1889,19 +1896,19 @@ export default function VolleyballTracker() {
             <div className="flex flex-col h-full">
               <div className="mb-4 pb-4 border-b border-gray-600">
                 <div className="bg-gray-900 rounded p-2 mb-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="text-xs text-gray-400">Stand:</div>
-                    <div className="text-2xl font-bold text-red-500">{homeScore}</div>
-                    <div className="text-xl font-bold text-gray-500">-</div>
-                    <div className="text-2xl font-bold text-blue-500">{awayScore}</div>
+                  <div className="flex items-center justify-center gap-1 sm:gap-2">
+                    <div className="text-[10px] sm:text-xs text-gray-400 hidden sm:block">Stand:</div>
+                    <div className="text-lg sm:text-2xl font-bold text-red-500">{homeScore}</div>
+                    <div className="text-sm sm:text-xl font-bold text-gray-500">-</div>
+                    <div className="text-lg sm:text-2xl font-bold text-blue-500">{awayScore}</div>
                   </div>
                 </div>
-                <div className="text-center text-xs">
+                <div className="text-center text-[10px] sm:text-xs">
                   <div className="text-gray-400">Sets</div>
                   <div className="font-bold">{sets.home} - {sets.away}</div>
                 </div>
                 {(homeTimeouts.length > 0 || awayTimeouts.length > 0) && (
-                  <div className="text-center text-xs mt-2">
+                  <div className="text-center text-[10px] sm:text-xs mt-2">
                     <div className="text-gray-400">TO</div>
                     <div className="text-[10px]">{homeTimeouts.length} - {awayTimeouts.length}</div>
                   </div>
