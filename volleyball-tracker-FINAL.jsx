@@ -108,48 +108,62 @@ export default function VolleyballTracker() {
   useEffect(() => {
     if (!isResizing) return;
     
-    const handleMouseMove = (e) => {
-      const newWidth = window.innerWidth - e.clientX;
+    const handleMove = (e) => {
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      if (!clientX) return;
+      
+      const newWidth = window.innerWidth - clientX;
       if (newWidth >= 280 && newWidth <= 600) {
         setSidebarWidth(newWidth);
         localStorage.setItem('sidebarWidth', newWidth.toString());
       }
     };
     
-    const handleMouseUp = () => {
+    const handleEnd = () => {
       setIsResizing(false);
     };
     
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchend', handleEnd);
     
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleMove);
+      document.removeEventListener('touchend', handleEnd);
     };
   }, [isResizing]);
 
   useEffect(() => {
     if (!isResizingCompact) return;
     
-    const handleMouseMove = (e) => {
-      const newWidth = window.innerWidth - e.clientX;
+    const handleMove = (e) => {
+      const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+      if (!clientX) return;
+      
+      const newWidth = window.innerWidth - clientX;
       if (newWidth >= 64 && newWidth <= 400) {
         setCompactSidebarWidth(newWidth);
         localStorage.setItem('compactSidebarWidth', newWidth.toString());
       }
     };
     
-    const handleMouseUp = () => {
+    const handleEnd = () => {
       setIsResizingCompact(false);
     };
     
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchend', handleEnd);
     
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleMove);
+      document.removeEventListener('touchend', handleEnd);
     };
   }, [isResizingCompact]);
 
@@ -1015,12 +1029,13 @@ export default function VolleyballTracker() {
       >
         {/* Resize Handle */}
         <div 
-          className="absolute left-0 top-0 bottom-0 w-1 bg-gray-600 hover:bg-blue-500 cursor-col-resize z-50 group"
+          className="absolute left-0 top-0 bottom-0 w-2 sm:w-1 bg-gray-600 hover:bg-blue-500 cursor-col-resize z-50 group active:bg-blue-500"
           onMouseDown={() => setIsResizing(true)}
+          onTouchStart={() => setIsResizing(true)}
         >
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-12 bg-gray-600 group-hover:bg-blue-500 rounded-r flex items-center justify-center">
-            <div className="w-0.5 h-6 bg-gray-400 mx-0.5"></div>
-            <div className="w-0.5 h-6 bg-gray-400 mx-0.5"></div>
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-6 sm:w-4 h-16 sm:h-12 bg-gray-600 group-hover:bg-blue-500 group-active:bg-blue-500 rounded-r flex items-center justify-center">
+            <div className="w-0.5 h-8 sm:h-6 bg-gray-400 mx-0.5"></div>
+            <div className="w-0.5 h-8 sm:h-6 bg-gray-400 mx-0.5"></div>
           </div>
         </div>
         <div className="p-4">
@@ -1860,12 +1875,13 @@ export default function VolleyballTracker() {
         >
           {/* Resize Handle voor compacte sidebar - LINKS */}
           <div 
-            className="absolute left-0 top-0 bottom-0 w-1 bg-gray-600 hover:bg-blue-500 cursor-col-resize z-50 group"
+            className="absolute left-0 top-0 bottom-0 w-2 sm:w-1 bg-gray-600 hover:bg-blue-500 cursor-col-resize z-50 group active:bg-blue-500"
             onMouseDown={() => setIsResizingCompact(true)}
+            onTouchStart={() => setIsResizingCompact(true)}
           >
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-12 bg-gray-600 group-hover:bg-blue-500 rounded-r flex items-center justify-center">
-              <div className="w-0.5 h-6 bg-gray-400 mx-0.5"></div>
-              <div className="w-0.5 h-6 bg-gray-400 mx-0.5"></div>
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-6 sm:w-4 h-16 sm:h-12 bg-gray-600 group-hover:bg-blue-500 group-active:bg-blue-500 rounded-r flex items-center justify-center">
+              <div className="w-0.5 h-8 sm:h-6 bg-gray-400 mx-0.5"></div>
+              <div className="w-0.5 h-8 sm:h-6 bg-gray-400 mx-0.5"></div>
             </div>
           </div>
           
